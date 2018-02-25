@@ -246,4 +246,30 @@ helpers.findNearestTeamMember = function (gameData) {
     return pathInfoObject.direction;
 };
 
+helpers.countNeighbourObjects = function(gameData, targetTile, type)
+{
+  const me = gameData.activeHero;
+  const board = gameData.board;
+  const dft = targetTile.distanceFromTop;
+  const dfl = targetTile.distanceFromLeft;
+  const directions = ['North', 'East', 'South', 'West'];
+  let counter = 0;
+  
+  for (let i = 0; i < directions.length; i++)
+  {
+    let tile = helpers.getTileNearby(board, dft, dfl, directions[i]);
+    if (tile)
+    {
+      if (   type === 'friend' && tile.type === 'Hero' && tile.team === me.team
+          || type === 'enemy' && tile.type === 'Hero' && tile.team !== me.team
+          || tile.type === type)
+      {
+        counter++;
+      }
+    }
+  }
+  
+  return counter;
+};
+
 module.exports = helpers;
