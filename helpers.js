@@ -163,28 +163,6 @@ helpers.findNearestNonTeamDiamondMine = function (gameData) {
     return pathInfoObject.direction;
 };
 
-// Returns the nearest unowned diamond mine or false, if there are no diamond mines
-helpers.findNearestUnownedDiamondMine = function (gameData) {
-    var hero = gameData.activeHero;
-    var board = gameData.board;
-
-    // Get the path info object
-    var pathInfoObject = helpers.findNearestObjectDirectionAndDistance(board, hero, function (mineTile) {
-        if (mineTile.type === 'DiamondMine') {
-            if (mineTile.owner) {
-                return mineTile.owner.id !== hero.id;
-            } else {
-                return true;
-            }
-        } else {
-            return false;
-        }
-    });
-
-    // Return the direction that needs to be taken to achieve the goal
-    return pathInfoObject.direction;
-};
-
 // Returns the nearest health well or false, if there are no health wells
 helpers.findNearestHealthWell = function (gameData) {
     var hero = gameData.activeHero;
@@ -270,6 +248,44 @@ helpers.countNeighbourObjects = function(gameData, targetTile, type)
   }
   
   return counter;
+};
+
+helpers.nearestTiles = function(board, targetTile, steps, fromTile = null)
+{
+  const dft = targetTile.distanceFromTop;
+  const dfl = targetTile.distanceFromLeft;
+  let key = '-1';
+  if (fromTile !== null)
+    key = fromTile.distanceFromTop + '|' + fromTile.distanceFromLeft;
+  const directions = ['North', 'East', 'South', 'West'];
+  
+  const area = [];
+  for (let i = 0; i < directions.length; i++)
+  {
+    let place = [];
+    let tile = helpers.getTileNearby(board, dft, dfl, directions[i]);
+    if (! tile || tile.distanceFromTop + '|' + tile.distanceFromLeft === key)
+      place.type = 'Impassable';
+    else
+    {
+      place.type = tile.type;
+      place.tile = tile;
+      if (steps > 1 && tile.type !== 'Impassable' && tile.type !== 'HealthWell')
+        place.nearestTiles = helpers.nearestTiles(board, tile, steps - 1, targetTile);
+    }
+    area[directions[i]] = place;
+  }
+  
+  return area;
+};
+
+helpers.localArea = function(gameData)
+{
+  const board = gameData.board;
+  const me = gameData.activeHero;
+  const localArea = helpers.nearestTiles(board, me, 3);
+  
+  return localArea;
 };
 
 module.exports = helpers;
