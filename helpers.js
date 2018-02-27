@@ -259,10 +259,10 @@ helpers.nearestTiles = function(board, targetTile, steps, fromTile = null)
     key = fromTile.distanceFromTop + '|' + fromTile.distanceFromLeft;
   const directions = ['North', 'East', 'South', 'West'];
   
-  const area = [];
+  const area = {};
   for (let i = 0; i < directions.length; i++)
   {
-    let place = [];
+    let place = {};
     let tile = helpers.getTileNearby(board, dft, dfl, directions[i]);
     if (! tile || tile.distanceFromTop + '|' + tile.distanceFromLeft === key)
       place.type = 'Impassable';
@@ -284,8 +284,38 @@ helpers.localArea = function(gameData)
   const board = gameData.board;
   const me = gameData.activeHero;
   const localArea = helpers.nearestTiles(board, me, 3);
+  localArea.me = me;
   
   return localArea;
+};
+
+helpers.weakestNeighbour = function(localArea, type = 'any')
+{
+  const neighbour = {};
+  neighbour.direction = 'North';
+  neighbour.health = 100;
+  const directions = ['North', 'East', 'South', 'West'];
+  for (let i = 0; i < directions.length; i++)
+  {
+    let place = localArea[directions[i]];
+    if (   place.type === 'Hero' && ! place.tile.dead
+        && place.tile.health < neighbour.health
+        && (   type === 'any'
+            || type === 'friend' && place.tile.team === localArea.me.team
+            || type === 'enemy' && place.tile.team !== localArea.me.team))
+    {
+      neighbour.direction = directions[i];
+      neighbour.health = place.tile.health;
+    }
+  }
+  
+  return neighbour;
+};
+
+helpers.weakestNeighbourDirection = function(localArea, type = 'any')
+{
+  const neighbour = helpers.weakestNeighbour(localArea, type);
+  return neighbour.direction;
 };
 
 module.exports = helpers;
