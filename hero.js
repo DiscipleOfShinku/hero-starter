@@ -40,6 +40,10 @@ var moves = {
     adventurer: function(gameData, helpers)
     {
       const me = gameData.activeHero;
+      const localArea = helpers.localArea(gameData);
+      const weakestNeighbourEnemy = helpers.weakestNeighbour(localArea, 'enemy');
+      const weakestNeighbourFriend = helpers.weakestNeighbour(localArea, 'friend');
+      const nearestWeakerEnemy = helpers.findNearestWeakerEnemy(gameData);
 
       const healthWellStats =
               helpers.findNearestObjectDirectionAndDistance(gameData.board, me,
@@ -52,18 +56,30 @@ var moves = {
       const neighbourEnemies = helpers.countNeighbourObjects(gameData, me,
                                                                 'enemy');
       
+      let areMinesToTake = true;
+      if (typeof helpers.findNearestNonTeamDiamondMine(gameData) === 'undefined')
+        areMinesToTake = false;
+      
       if (neighbourFriends === 4)
-        return helpers.findNearestTeamMember(gameData);
+        return helpers.weakestNeighbourDirection(localArea);
       else if (neighbourEnemies === 4)
-        return helpers.findNearestEnemy(gameData);
+        return helpers.weakestNeighbourDirection(localArea);
+      else if (neighbourEnemies > 0 && weakestNeighbourEnemy.health <= me.health)
+        return weakestNeighbourEnemy.direction;
       else if (me.health <= 60 && distanceToHealthWell === 1)
         return directionToHealthWell;
-      else if (me.health === 100 && neighbourEnemies === 0)
-          return helpers.findNearestNonTeamDiamondMine(gameData);
+      else if (neighbourFriends > 0 && weakestNeighbourFriend.health < 100)
+        return weakestNeighbourFriend.direction;
+      else if (me.health === 100 && neighbourEnemies === 0 && areMinesToTake)
+        return helpers.findNearestNonTeamDiamondMine(gameData);
       else if (me.health <= 60)
-          return helpers.findNearestHealthWell(gameData);
+        return helpers.findNearestHealthWell(gameData);
+      else if (typeof nearestWeakerEnemy === 'undefined' && me.health < 100)
+        return helpers.findNearestHealthWell(gameData);
+      else if (typeof nearestWeakerEnemy === 'undefined' && me.health === 100)
+        return helpers.findNearestEnemy(gameData);
       else
-        return helpers.findNearestWeakerEnemy(gameData);
+        return nearestWeakerEnemy;
     },
 };
 
