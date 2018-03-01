@@ -238,8 +238,10 @@ helpers.countNeighbourObjects = function(gameData, targetTile, type)
     let tile = helpers.getTileNearby(board, dft, dfl, directions[i]);
     if (tile)
     {
-      if (   type === 'friend' && tile.type === 'Hero' && tile.team === me.team
-          || type === 'enemy' && tile.type === 'Hero' && tile.team !== me.team
+      if (   type === 'friend' && tile.type === 'Hero'
+          && ! tile.dead && tile.team === me.team
+          || type === 'enemy' && tile.type === 'Hero'
+          && ! tile.dead && tile.team !== me.team
           || tile.type === type)
       {
         counter++;
