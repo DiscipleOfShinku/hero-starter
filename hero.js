@@ -52,9 +52,9 @@ var moves = {
       const directionToHealthWell = healthWellStats.direction;
 
       const neighbourFriends = helpers.countNeighbourObjects(gameData, me,
-                                                                'friend');
+                      x => x.type === 'Hero' && ! x.dead && x.team === me.team);
       const neighbourEnemies = helpers.countNeighbourObjects(gameData, me,
-                                                                'enemy');
+                      x => x.type === 'Hero' && ! x.dead && x.team !== me.team);
       
       let areMinesToTake = true;
       if (typeof helpers.findNearestNonTeamDiamondMine(gameData) === 'undefined')

@@ -224,7 +224,7 @@ helpers.findNearestTeamMember = function (gameData) {
     return pathInfoObject.direction;
 };
 
-helpers.countNeighbourObjects = function(gameData, targetTile, type)
+helpers.countNeighbourObjects = function(gameData, targetTile, tileCallback)
 {
   const me = gameData.activeHero;
   const board = gameData.board;
@@ -238,14 +238,18 @@ helpers.countNeighbourObjects = function(gameData, targetTile, type)
     let tile = helpers.getTileNearby(board, dft, dfl, directions[i]);
     if (tile)
     {
-      if (   type === 'friend' && tile.type === 'Hero'
-          && ! tile.dead && tile.team === me.team
-          || type === 'enemy' && tile.type === 'Hero'
-          && ! tile.dead && tile.team !== me.team
-          || tile.type === type)
+      let isObjectFound = false;
+      try
       {
-        counter++;
+        isObjectFound = tileCallback(tile);
+          
+      } catch (err)
+      {
+        isObjectFound = false;
       }
+      
+      if (isObjectFound)
+        counter++;
     }
   }
   
