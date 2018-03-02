@@ -64,6 +64,8 @@ var moves = {
         return helpers.weakestNeighbourDirection(localArea);
       else if (neighbourEnemies === 4)
         return helpers.weakestNeighbourDirection(localArea);
+      else if (neighbourEnemies === 1 && helpers.isSingleNeighbourEnemyKillable(gameData, weakestNeighbourEnemy.tile))
+        return weakestNeighbourEnemy.direction;
       else if (neighbourEnemies > 0 && weakestNeighbourEnemy.health <= me.health)
         return weakestNeighbourEnemy.direction;
       else if (me.health <= 60 && distanceToHealthWell === 1)

@@ -305,13 +305,14 @@ helpers.weakestNeighbour = function(localArea, type = 'any')
   {
     let place = localArea[directions[i]];
     if (   place.type === 'Hero' && ! place.tile.dead
-        && place.tile.health < neighbour.health
+        && place.tile.health <= neighbour.health
         && (   type === 'any'
             || type === 'friend' && place.tile.team === localArea.me.team
             || type === 'enemy' && place.tile.team !== localArea.me.team))
     {
       neighbour.direction = directions[i];
       neighbour.health = place.tile.health;
+      neighbour.tile = place.tile;
     }
   }
   
@@ -322,6 +323,21 @@ helpers.weakestNeighbourDirection = function(localArea, type = 'any')
 {
   const neighbour = helpers.weakestNeighbour(localArea, type);
   return neighbour.direction;
+};
+
+helpers.isSingleNeighbourEnemyKillable = function(gameData, enemy)
+{
+  // consider also surroundings
+  const me = gameData.activeHero;
+  const myTurns = Math.ceil(enemy.health / 30);
+  let enemyDamage = 30;
+  if (enemy.lastActiveTurn === 0)
+    enemyDamage = 20;
+  const enemyTurns = Math.ceil(me.health / enemyDamage);
+  if (myTurns > enemyTurns)
+    return false;
+  
+  return true;
 };
 
 module.exports = helpers;
