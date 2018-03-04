@@ -291,8 +291,11 @@ helpers.localArea = function(gameData)
   const me = gameData.activeHero;
   const localArea = helpers.nearestTiles(board, me, 3);
   
-  for (let i = 0; i < localArea.length; i++)
+  for (let i in localArea)
   {
+    if (localArea[i].type === 'Impassable')
+      continue;
+    
     let tile = localArea[i].tile;
     localArea[i].possibilities = helpers.nearestPossibilities(board, tile, me);
   }
@@ -391,6 +394,7 @@ helpers.nearestPossibilities = function(board, targetTile, hero)
   let distantThreat = 0;
   let kills = 0;
   let neighbours = [];
+  let directionToWell = false;
   
   let isHeroHasAttack = true;
   if (targetTile.name !== hero.name)
@@ -405,6 +409,9 @@ helpers.nearestPossibilities = function(board, targetTile, hero)
     
     if (distantThreat === 0 && (tile.type === 'Unoccupied' || tile.name === hero.name))
       distantThreat = helpers.distantThreat(board, tile, hero);
+    
+    if (tile.type === 'HealthWell')
+      directionToWell = directions[i];
       
     if (tile.type !== 'Hero' || tile.dead || tile.id === hero.id)
       continue;
@@ -431,6 +438,7 @@ helpers.nearestPossibilities = function(board, targetTile, hero)
   possibilities.threat = threat;
   possibilities.distantThreat = distantThreat;
   possibilities.kills = kills;
+  possibilities.directionToWell = directionToWell;
   possibilities.directionToAttack = directionToAttack;
   
   return possibilities;
