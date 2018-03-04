@@ -340,4 +340,15 @@ helpers.isSingleNeighbourEnemyKillable = function(gameData, enemy)
   return true;
 };
 
+helpers.estimateHeroAggress = function(hero)
+{
+  let aggress = 20;
+  if (hero.damageDone % 20 !== 0 || hero.heroesKilled.length > 0)
+    aggress = 30;
+  else if (hero.healthRecovered > 0 && hero.damageDone === 0)
+    aggress = 0;
+  
+  return aggress;
+};
+
 module.exports = helpers;
