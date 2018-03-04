@@ -41,15 +41,39 @@ var moves = {
     {
       const me = gameData.activeHero;
       const localArea = helpers.localArea(gameData);
+      
+      let maxKillPossible = 0;
+      let directionToKill = false;
+      for (let i in localArea)
+      {
+        if (localArea[i].type === 'Impassable')
+          continue;
+        
+        let possibilities = localArea[i].possibilities;
+        if (maxKillPossible < possibilities.kills)
+        {
+          maxKillPossible = possibilities.kills;
+          if (i === 'myTile')
+            directionToKill = possibilities.directionToAttack;
+          else
+            directionToKill = i;
+        }
+      }
+      if (maxKillPossible > 0)
+      {
+        if (directionToKill)
+          return directionToKill;
+        
+        let possibilities = localArea.myTile.possibilities;
+        if (possibilities.directionToWell)
+          return possibilities.directionToWell;
+        
+        return helpers.findNearestEnemy(gameData);
+      }
+      
       const weakestNeighbourEnemy = helpers.weakestNeighbour(localArea, 'enemy');
       const weakestNeighbourFriend = helpers.weakestNeighbour(localArea, 'friend');
       const nearestWeakerEnemy = helpers.findNearestWeakerEnemy(gameData);
-
-      const healthWellStats =
-              helpers.findNearestObjectDirectionAndDistance(gameData.board, me,
-                                                  x => x.type === 'HealthWell');
-      const distanceToHealthWell = healthWellStats.distance;
-      const directionToHealthWell = healthWellStats.direction;
 
       const neighbourFriends = helpers.countNeighbourObjects(gameData, me,
                       x => x.type === 'Hero' && ! x.dead && x.team === me.team);
@@ -68,13 +92,13 @@ var moves = {
         return weakestNeighbourEnemy.direction;
       else if (neighbourEnemies > 0 && weakestNeighbourEnemy.health <= me.health)
         return weakestNeighbourEnemy.direction;
-      else if (me.health <= 60 && distanceToHealthWell === 1)
-        return directionToHealthWell;
+      else if (me.health <= 60 && localArea.myTile.possibilities.directionToWell)
+        return localArea.myTile.possibilities.directionToWell;
       else if (neighbourFriends > 0 && weakestNeighbourFriend.health < 100)
         return weakestNeighbourFriend.direction;
-      else if (me.health === 100 && neighbourEnemies === 0 && areMinesToTake)
+      else if (me.health > 70 && neighbourEnemies === 0 && areMinesToTake)
         return helpers.findNearestNonTeamDiamondMine(gameData);
-      else if (me.health <= 60)
+      else if (me.health <= 70)
         return helpers.findNearestHealthWell(gameData);
       else if (typeof nearestWeakerEnemy === 'undefined' && me.health < 100)
         return helpers.findNearestHealthWell(gameData);
