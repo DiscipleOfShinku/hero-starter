@@ -290,7 +290,16 @@ helpers.localArea = function(gameData)
   const board = gameData.board;
   const me = gameData.activeHero;
   const localArea = helpers.nearestTiles(board, me, 3);
-  localArea.me = me;
+  
+  for (let i = 0; i < localArea.length; i++)
+  {
+    let tile = localArea[i].tile;
+    localArea[i].possibilities = helpers.nearestPossibilities(board, tile, me);
+  }
+  const myTile = {};
+  myTile.tile = me;
+  myTile.possibilities = helpers.nearestPossibilities(board, me, me);
+  localArea.myTile = myTile;
   
   return localArea;
 };
@@ -307,8 +316,10 @@ helpers.weakestNeighbour = function(localArea, type = 'any')
     if (   place.type === 'Hero' && ! place.tile.dead
         && place.tile.health <= neighbour.health
         && (   type === 'any'
-            || type === 'friend' && place.tile.team === localArea.me.team
-            || type === 'enemy' && place.tile.team !== localArea.me.team))
+            || type === 'friend'
+            && place.tile.team === localArea.myTile.tile.team
+            || type === 'enemy'
+            && place.tile.team !== localArea.myTile.tile.team))
     {
       neighbour.direction = directions[i];
       neighbour.health = place.tile.health;
@@ -349,6 +360,80 @@ helpers.estimateHeroAggress = function(hero)
     aggress = 0;
   
   return aggress;
+};
+
+helpers.distantThreat = function(board, targetTile, hero)
+{
+  const dft = targetTile.distanceFromTop;
+  const dfl = targetTile.distanceFromLeft;
+  const directions = ['North', 'East', 'South', 'West'];
+  let threat = 0;
+  
+  for (let i = 0; i < directions.length; i++)
+  {
+    let tile = helpers.getTileNearby(board, dft, dfl, directions[i]);
+    if (! tile || tile.type !== 'Hero' || tile.dead || tile.team === hero.team)
+      continue;
+    
+    if (hero.lastActiveTurn === 0 || tile.lastActiveTurn > 0)
+      threat = 20;
+  }
+  
+  return threat;
+};
+
+helpers.nearestPossibilities = function(board, targetTile, hero)
+{
+  const dft = targetTile.distanceFromTop;
+  const dfl = targetTile.distanceFromLeft;
+  const directions = ['North', 'East', 'South', 'West'];
+  let threat = 0;
+  let distantThreat = 0;
+  let kills = 0;
+  let neighbours = [];
+  
+  let isHeroHasAttack = true;
+  if (targetTile.name !== hero.name)
+    isHeroHasAttack = false;
+  let directionToAttack = false;
+  
+  for (let i = 0; i < directions.length; i++)
+  {
+    let tile = helpers.getTileNearby(board, dft, dfl, directions[i]);
+    if (! tile)
+      continue;
+    
+    if (distantThreat === 0 && (tile.type === 'Unoccupied' || tile.name === hero.name))
+      distantThreat = helpers.distantThreat(board, tile, hero);
+      
+    if (tile.type !== 'Hero' || tile.dead || tile.id === hero.id)
+      continue;
+    
+    neighbours.push(tile);
+    if (tile.team === hero.team && tile.healthGiven > 0)
+      threat -= 40;
+    else if (tile.health <= 20)
+      kills++;
+    else if (isHeroHasAttack && tile.health === 30)
+    {
+      directionToAttack = directions[i];
+      kills++;
+      isHeroHasAttack = false;
+      
+    } else if (hero.lastActiveTurn === 0 || tile.lastActiveTurn > 0)
+      threat += 30;
+    else
+      threat += 20;
+  }
+  
+  const possibilities = {};
+  possibilities.neighbours = neighbours;
+  possibilities.threat = threat;
+  possibilities.distantThreat = distantThreat;
+  possibilities.kills = kills;
+  possibilities.directionToAttack = directionToAttack;
+  
+  return possibilities;
 };
 
 module.exports = helpers;
