@@ -4,8 +4,14 @@
   "main": "helpers.js",
   "scripts": {
     "sanity": "mocha -R spec ./test/spec/HeroBrainSpec.js",
-    "lint": "eslint ./",
+    "lint": "eslint ./hero.js ./helpers.js",
     "test": "yarn run sanity && yarn run lint"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn test",
+      "pre-push": "yarn test"
+    }
   },
   "repository": {
     "type": "git",
@@ -21,6 +27,7 @@
     "chai": "^1.9.2",
     "commander": "^2.9.0",
     "eslint": "^3.8.0",
+    "husky": "^3.0.1",
     "mocha": "^1.21.4"
   },
   "dependencies": {

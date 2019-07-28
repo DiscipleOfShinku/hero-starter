@@ -31,7 +31,7 @@ helpers.getTileNearby = (board, distanceFromTop, distanceFromLeft, direction) =>
   // If the coordinates of the tile nearby are valid, return the tile object at
   // those coordinates
   if (helpers.validCoordinates(board, fromTopNew, fromLeftNew))
-      return board.tiles[fromTopNew][fromLeftNew];
+    return board.tiles[fromTopNew][fromLeftNew];
 
   return false;
 };
@@ -251,7 +251,6 @@ helpers.findNearestTeamMember = gameData =>
 
 helpers.countNeighbourObjects = function(gameData, targetTile, tileCallback)
 {
-  const me = gameData.activeHero;
   const board = gameData.board;
   const dft = targetTile.distanceFromTop;
   const dfl = targetTile.distanceFromLeft;
