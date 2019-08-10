@@ -467,7 +467,10 @@ helpers.nearestPossibilities = function(board, targetTile, hero)
 
     if (tile.team === hero.team && tile.healthGiven > 0)
       threat -= 40;
-    else if (tile.health <= 20)
+    else if (tile.team === hero.team)
+      continue;
+
+    if (tile.health <= 20)
       kills++;
     else if (isHeroHasAttack && tile.health === 30)
     {
