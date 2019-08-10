@@ -84,7 +84,7 @@ const moves =
                     x => x.type === 'Hero' && ! x.dead && x.team !== me.team);
 
     let areMinesToTake = true;
-    if (typeof helpers.findNearestNonTeamDiamondMine(gameData) === 'undefined')
+    if (typeof helpers.findMineToTake(gameData) === 'undefined')
       areMinesToTake = false;
 
     if (neighbourFriends === 4)
@@ -110,7 +110,7 @@ const moves =
       return weakestNeighbourFriend.direction;
 
     if (me.health > 70 && neighbourEnemies === 0 && areMinesToTake)
-      return helpers.findNearestNonTeamDiamondMine(gameData);
+      return helpers.findMineToTake(gameData);
 
     if (me.health <= 70)
       return helpers.findNearestHealthWell(gameData);

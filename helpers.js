@@ -150,9 +150,11 @@ helpers.findNearestObjectDirectionAndDistance = (board, fromTile,
   return false;
 };
 
-// Returns the direction of the nearest non-team diamond mine or false, if there
-// are no diamond mines
-helpers.findNearestNonTeamDiamondMine = gameData =>
+/**
+ * Returns the direction of the nearest diamond mine not belonging to a live
+ * friend or false, if there are no diamond mines
+ */
+helpers.findMineToTake = gameData =>
 {
   const hero = gameData.activeHero;
   const board = gameData.board;
@@ -162,7 +164,7 @@ helpers.findNearestNonTeamDiamondMine = gameData =>
     if (tile.type !== 'DiamondMine')
       return false;
 
-    if (! tile.owner)
+    if (! tile.owner || tile.owner.dead)
       return true;
 
     return tile.owner.team !== hero.team;
