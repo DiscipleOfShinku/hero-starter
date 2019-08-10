@@ -122,7 +122,7 @@ helpers.findNearestObjectDirectionAndDistance = (board, fromTile,
         }
 
         // Return object with the following pertinent info
-        const goalTile = nextTile;
+        const goalTile = {...nextTile};
         goalTile.direction = correctDirection;
         goalTile.distance = distance;
         goalTile.coords = targetCoords;
